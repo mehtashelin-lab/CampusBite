@@ -1,0 +1,12 @@
+.venv/
+.env
+backend/.env
+backend/data/*.db
+backend/.venv/
+backend/**/__pycache__/
+*.py[cod]
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+Problem Statement.docx
+CampusBite_Backend_Codebase_Study_Guide.docx
