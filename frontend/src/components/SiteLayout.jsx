@@ -18,14 +18,15 @@ export default function SiteLayout() {
     <div className="app-shell">
       <header className="site-header">
         <div className="header-inner">
-          <Link className="brand" to={user?.role === "RESTAURANT_OWNER" ? "/owner" : "/"} aria-label="CampusBite home">
+          <Link className="brand" to={user?.role === "RESTAURANT_OWNER" ? "/owner" : user?.role === "DELIVERY_PARTNER" ? "/delivery" : "/"} aria-label="CampusBite home">
             <span className="brand-mark">C</span>
             <span>campus<span className="brand-accent">bite</span></span>
           </Link>
           <nav className="main-nav" aria-label="Main navigation">
-            {user?.role !== "RESTAURANT_OWNER" && <NavLink to="/">Restaurants</NavLink>}
+            {(!user || user?.role === "CUSTOMER") && <NavLink to="/">Restaurants</NavLink>}
             {user?.role === "CUSTOMER" && <NavLink to="/customer">My orders</NavLink>}
             {user?.role === "RESTAURANT_OWNER" && <NavLink to="/owner">Owner dashboard</NavLink>}
+            {user?.role === "DELIVERY_PARTNER" && <NavLink to="/delivery">Delivery dashboard</NavLink>}
             {!user && <NavLink to="/login">Log in</NavLink>}
           </nav>
           <div className="header-actions">

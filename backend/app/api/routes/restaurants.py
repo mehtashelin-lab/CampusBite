@@ -35,6 +35,9 @@ def create_restaurant(
     db: DbSession,
     owner: User = Depends(require_role(UserRole.RESTAURANT_OWNER)),
 ):
+    existing_restaurant = db.scalar(select(Restaurant.id).where(Restaurant.owner_id == owner.id))
+    if existing_restaurant is not None:
+        raise HTTPException(status_code=409, detail="Each owner can create only one restaurant.")
     restaurant = Restaurant(owner_id=owner.id, name=request.name, description=request.description)
     db.add(restaurant)
     db.commit()
@@ -52,6 +55,20 @@ def list_menu(restaurant_id: int, db: DbSession):
         MenuItem.is_available.is_(True),
     ).order_by(MenuItem.name)
     return list(db.scalars(query))
+
+
+@router.get("/{restaurant_id}/menu/manage", response_model=list[MenuItemResponse])
+def manage_menu(
+    restaurant_id: int,
+    db: DbSession,
+    owner: User = Depends(require_role(UserRole.RESTAURANT_OWNER)),
+):
+    restaurant = db.get(Restaurant, restaurant_id)
+    if restaurant is None or restaurant.owner_id != owner.id:
+        raise HTTPException(status_code=404, detail="Restaurant not found.")
+    return list(db.scalars(
+        select(MenuItem).where(MenuItem.restaurant_id == restaurant_id).order_by(MenuItem.name)
+    ))
 
 
 @router.post("/{restaurant_id}/menu", response_model=MenuItemResponse, status_code=status.HTTP_201_CREATED)

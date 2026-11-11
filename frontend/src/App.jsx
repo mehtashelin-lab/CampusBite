@@ -19,12 +19,14 @@ function DashboardRedirect() {
 
 function CustomerFacingArea() {
   const { user } = useAuth();
-  return user?.role === "RESTAURANT_OWNER" ? <Navigate to="/owner" replace /> : <Outlet />;
+  return user?.role === "RESTAURANT_OWNER" || user?.role === "DELIVERY_PARTNER"
+    ? <Navigate to={dashboardPath(user.role)} replace />
+    : <Outlet />;
 }
 
 function RouteFallback() {
   const { user } = useAuth();
-  return user?.role === "RESTAURANT_OWNER" ? <Navigate to="/owner" replace /> : <NotFoundPage />;
+  return user ? <Navigate to={dashboardPath(user.role)} replace /> : <NotFoundPage />;
 }
 
 export default function App() {
@@ -34,13 +36,13 @@ export default function App() {
         <Route element={<CustomerFacingArea />}>
           <Route path="/" element={<RestaurantsPage />} />
           <Route path="/restaurants/:restaurantId" element={<MenuPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
           <Route element={<ProtectedRoute allowedRoles={["CUSTOMER"]} />}>
             <Route path="/cart" element={<CartPage />} />
             <Route path="/customer" element={<CustomerDashboard />} />
           </Route>
         </Route>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardRedirect />} />
         </Route>

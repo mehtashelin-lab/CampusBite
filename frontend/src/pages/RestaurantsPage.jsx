@@ -30,16 +30,19 @@ export default function RestaurantsPage() {
     <>
       <section className="hero">
         <div className="hero-copy">
-          <p className="eyebrow">A better bite between classes</p>
-          <h1>Good food.<br /><span>Close to campus.</span></h1>
-          <p className="hero-description">Discover campus favourites, find your next meal, and get your order moving in a few simple steps.</p>
+          <p className="eyebrow">Fulfill your roadside cravings</p>
+          <h1>Roadside Food.<br /><span>From across the city.</span></h1>
+          <p className="hero-description">Explore roadside food stalls, discover something new and order to make your day</p>
           <a className="button" href="#restaurants">Explore restaurants <span aria-hidden="true">↓</span></a>
         </div>
         <div className="hero-art" aria-hidden="true">
           <div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" />
-          <div className="plate"><span className="plate-center">CB</span><i className="plate-leaf leaf-one" /><i className="plate-leaf leaf-two" /><i className="plate-leaf leaf-three" /></div>
+          <div className="plate">
+            <img className="plate-food-image" src="/roadside-stall-vendor.png" alt="" />
+            <span className="stall-sign">CampusBite</span>
+          </div>
           <span className="hero-sticker sticker-top">FRESH<br />& LOCAL</span>
-          <span className="hero-sticker sticker-bottom">YOUR<br />LUNCH, SORTED</span>
+          <span className="hero-sticker sticker-bottom">YOUR<br />CRAVINGS<br />FULFILLED</span>
         </div>
       </section>
 

@@ -13,9 +13,14 @@ The frontend is a React app built with Vite. It calls the FastAPI backend at `ht
 
 - Restaurant listing and menu browsing are public.
 - Customers can register, log in, save a cart, place a mock-paid order, view their orders, and cancel an order while it is still placed.
-- Restaurant owners can create multiple restaurants, add and edit dishes, view incoming orders, and accept placed orders.
+- Restaurant owners can create one restaurant, add and edit dishes, view incoming orders, accept or reject placed orders, and move accepted orders through preparation to automatic delivery assignment.
 - Owner accounts are limited to the owner dashboard and cannot browse restaurant menus, use the cart, or place customer orders.
-- The delivery partner route is a placeholder until the backend has assigned-delivery endpoints.
+- Customers provide a delivery address at checkout and see order status updates in their dashboard.
+- Customers can select saved delivery addresses or add and remove addresses, with a maximum of five per account. The checkout carries the saved address into the order.
+- Order summaries show the order date and time beneath the order number. Delivered orders also show their completion date, time, and delivery partner when that information is recorded.
+- Delivery partners cannot browse restaurants or menus. They can set availability, receive one active delivery at a time, start a delivery, mark it delivered, and review completed deliveries.
+- Customer, owner, and delivery dashboards can filter orders by status and date range.
+- New accounts require matching password and confirmation fields.
 
 ## Code map
 
