@@ -6,7 +6,7 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: sqlite:////app/data/campusbite.db
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-this-local-secret-before-deployment}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env (copy .env.example and add a value)}
       JWT_ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 60
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}

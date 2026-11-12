@@ -1,10 +1,10 @@
 # CampusBite backend
 
-This folder contains the FastAPI application. It stores project data in a SQLite file.
+This folder contains the FastAPI application. It stores project data in a SQLite file. For the full project overview and the recommended Docker Compose setup, see the [root README](../README.md).
 
 ## Run with Docker Compose
 
-1. From the project folder, copy `.env.example` to `.env` and replace `JWT_SECRET_KEY` with a long random value.
+1. From the project folder, copy `.env.example` to `.env` and set `JWT_SECRET_KEY` to a long random value. Compose will refuse to start if this value is missing.
 2. Run `docker compose up --build` from the project folder.
 3. Open `http://localhost:8000/docs` to explore and try the API.
 
@@ -46,7 +46,7 @@ Customers can ask `POST /api/orders/insights` questions about their 20 most rece
 - `app/models`: Python classes that become database tables.
 - `app/schemas`: shapes of API requests and responses.
 
-For local development without Docker, install `requirements.txt`, set `DATABASE_URL=sqlite:///./campusbite.db`, then run `uvicorn app.main:app --reload` from this folder.
+For local development without Docker, install `requirements.txt`, set `DATABASE_URL=sqlite:///./campusbite.db` and a private `JWT_SECRET_KEY`, then run `uvicorn app.main:app --reload` from this folder. Set `OPENAI_API_KEY` only if you want to use customer order insights.
 
 ## Run the backend checks
 

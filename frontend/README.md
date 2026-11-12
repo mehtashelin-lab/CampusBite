@@ -1,13 +1,13 @@
 # CampusBite frontend
 
-The frontend is a React app built with Vite. It calls the FastAPI backend at `http://localhost:8000` by default.
+The frontend is a React app built with Vite. It calls the FastAPI backend at `http://localhost:8000` by default. See the [root README](../README.md) for the full project overview and Docker Compose setup.
 
 ## Start the app
 
 1. Start the backend from the project folder with `docker compose up --build`.
-2. In a second terminal, open this `frontend` folder and run `npm install` once.
+2. In a second terminal, open this `frontend` folder and run `npm ci` once.
 3. Run `npm run dev` and open the local address printed by Vite (normally `http://localhost:5173`).
-4. Optional: copy `.env.example` to `.env` and set `VITE_API_URL` if the backend runs at a different address.
+4. Optional: copy `frontend/.env.example` to `frontend/.env` and set `VITE_API_URL` if the backend runs at a different address.
 
 ## Screens
 
