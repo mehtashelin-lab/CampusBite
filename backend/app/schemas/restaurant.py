@@ -14,6 +14,11 @@ class RestaurantResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class PublicRestaurantResponse(RestaurantResponse):
+    average_rating: float | None
+    review_count: int
+
+
 class MenuItemCreate(BaseModel):
     name: str = Field(min_length=2, max_length=160)
     description: str = Field(default="", max_length=500)

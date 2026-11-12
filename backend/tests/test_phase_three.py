@@ -145,6 +145,36 @@ def test_owner_statistics_exclude_cancelled_rejected_and_refunded_orders(client)
     }
 
 
+def test_public_restaurant_list_includes_rating_aggregates_and_cancel_timestamp(client):
+    owner = make_account(client, "rating-owner@example.com", "RESTAURANT_OWNER")
+    customer = make_account(client, "rating-customer@example.com", "CUSTOMER")
+    partner = make_account(client, "rating-partner@example.com", "DELIVERY_PARTNER")
+    empty_owner = make_account(client, "empty-rating-owner@example.com", "RESTAURANT_OWNER")
+    restaurant_id, item_id = create_restaurant_and_item(client, owner)
+    empty_restaurant_id, _ = create_restaurant_and_item(client, empty_owner)
+    client.patch("/api/delivery/availability", headers=partner, json={"is_available": True})
+    order = create_order(client, customer, restaurant_id, item_id, "12 Campus Road, Pune")
+    mark_delivered(client, owner, partner, order["id"])
+    assert client.post(f"/api/orders/{order['id']}/review", headers=customer, json={"rating": 5}).status_code == 201
+
+    restaurants = client.get("/api/restaurants")
+    assert restaurants.status_code == 200
+    by_id = {restaurant["id"]: restaurant for restaurant in restaurants.json()}
+    assert by_id[restaurant_id]["average_rating"] == 5.0
+    assert by_id[restaurant_id]["review_count"] == 1
+    assert by_id[empty_restaurant_id]["average_rating"] is None
+    assert by_id[empty_restaurant_id]["review_count"] == 0
+
+    cancelled = create_order(client, customer, restaurant_id, item_id, "13 Campus Road, Pune")
+    assert client.patch(f"/api/orders/{cancelled['id']}/cancel", headers=customer).status_code == 200
+    owner_orders = client.get("/api/owner/orders", headers=owner)
+    assert owner_orders.status_code == 200
+    cancelled_response = next(order for order in owner_orders.json() if order["id"] == cancelled["id"])
+    assert cancelled_response["cancelled_at"]
+    with client.session_factory() as db:
+        assert cancelled_response["cancelled_at"] == db.get(Order, cancelled["id"]).status_updated_at.replace(tzinfo=UTC).isoformat()
+
+
 def test_request_logs_do_not_include_request_body(client, caplog):
     caplog.set_level(logging.INFO, logger="campusbite.requests")
     secret = "sensitive-body-content"

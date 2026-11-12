@@ -5,6 +5,7 @@ import Loading from "../components/Loading.jsx";
 import Notice from "../components/Notice.jsx";
 import OrderCard from "../components/OrderCard.jsx";
 import OrderFilters, { CUSTOMER_OWNER_ORDER_STATUSES, filterOrders } from "../components/OrderFilters.jsx";
+import { sortOrdersNewestFirst, visibleOrderBatch } from "../components/dashboardOrderUtils.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function CustomerDashboard() {
@@ -19,6 +20,7 @@ export default function CustomerDashboard() {
   const [notice, setNotice] = useState(location.state?.notice || "");
   const [busyId, setBusyId] = useState(null);
   const [orderFilters, setOrderFilters] = useState({ statuses: [], from: "", to: "" });
+  const [visibleOrderCount, setVisibleOrderCount] = useState(5);
   const [insightQuestion, setInsightQuestion] = useState("");
   const [insightAnswer, setInsightAnswer] = useState("");
   const [insightError, setInsightError] = useState("");
@@ -91,7 +93,16 @@ export default function CustomerDashboard() {
 
   const restaurantNames = Object.fromEntries(restaurants.map((restaurant) => [restaurant.id, restaurant.name]));
   const activeCount = orders.filter((order) => !["DELIVERED", "CANCELLED", "REJECTED", "REFUNDED"].includes(order.status)).length;
-  const filteredOrders = useMemo(() => filterOrders(orders, orderFilters), [orders, orderFilters]);
+  const filteredOrders = useMemo(
+    () => sortOrdersNewestFirst(filterOrders(orders, orderFilters)),
+    [orders, orderFilters],
+  );
+  const visibleOrders = useMemo(
+    () => visibleOrderBatch(filteredOrders, visibleOrderCount),
+    [filteredOrders, visibleOrderCount],
+  );
+
+  useEffect(() => setVisibleOrderCount(5), [orderFilters]);
 
   return <section className="section-wrap dashboard-page">
     <div className="dashboard-welcome"><div><p className="eyebrow">Your CampusBite</p><h1>Hello, {user.full_name.split(" ")[0]}.</h1><p className="muted">Your orders, all in one place.</p></div><Link className="button" to="/">Find a meal <span aria-hidden="true">→</span></Link></div>
@@ -112,6 +123,6 @@ export default function CustomerDashboard() {
     <div className="section-heading dashboard-section-heading"><div><p className="eyebrow">Order history</p><h2>Your recent orders</h2></div><button className="text-button" onClick={refresh}>Refresh list ↻</button></div>
     <Notice>{error}</Notice><Notice tone="success">{notice}</Notice>
     {!loading && orders.length > 0 && <OrderFilters value={orderFilters} onChange={setOrderFilters} statuses={CUSTOMER_OWNER_ORDER_STATUSES} />}
-    {loading ? <Loading label="Loading your orders" /> : orders.length ? filteredOrders.length ? <div className="order-list">{filteredOrders.map((order) => <OrderCard key={order.id} order={order} restaurantName={restaurantNames[order.restaurant_id]} onCancel={cancelOrder} onReview={submitReview} onRefund={requestRefund} review={reviews.find((item) => item.order_id === order.id)} refundRequest={refundRequests.find((item) => item.order_id === order.id)} busy={busyId === order.id} />)}</div> : <div className="compact-empty"><h3>No matching orders</h3><p>Change or clear the filters to see more orders.</p></div> : <div className="empty-state"><span className="empty-icon">↗</span><h3>No orders yet</h3><p>Your next favourite meal is a few clicks away.</p><Link className="button" to="/">Explore restaurants</Link></div>}
+    {loading ? <Loading label="Loading your orders" /> : orders.length ? filteredOrders.length ? <><p className="count-label order-pagination-count">Showing {visibleOrders.length} of {filteredOrders.length} matching orders</p><div className="order-list">{visibleOrders.map((order) => <OrderCard key={order.id} order={order} restaurantName={restaurantNames[order.restaurant_id]} onCancel={cancelOrder} onReview={submitReview} onRefund={requestRefund} review={reviews.find((item) => item.order_id === order.id)} refundRequest={refundRequests.find((item) => item.order_id === order.id)} busy={busyId === order.id} />)}</div>{visibleOrders.length < filteredOrders.length && <button type="button" className="button button-outline order-more-button" onClick={() => setVisibleOrderCount((count) => count + 5)}>Show 5 older orders</button>}</> : <div className="compact-empty"><h3>No matching orders</h3><p>Change or clear the filters to see more orders.</p></div> : <div className="empty-state"><span className="empty-icon">↗</span><h3>No orders yet</h3><p>Your next favourite meal is a few clicks away.</p><Link className="button" to="/">Explore restaurants</Link></div>}
   </section>;
 }

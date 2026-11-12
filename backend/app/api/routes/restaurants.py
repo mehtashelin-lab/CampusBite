@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.api.deps import DbSession, require_role
-from app.models import MenuItem, Restaurant, User, UserRole
+from app.models import MenuItem, Order, Restaurant, Review, User, UserRole
 from app.schemas.restaurant import (
     MenuItemCreate,
     MenuItemResponse,
     MenuItemUpdate,
+    PublicRestaurantResponse,
     RestaurantCreate,
     RestaurantResponse,
 )
@@ -14,9 +15,35 @@ from app.schemas.restaurant import (
 router = APIRouter()
 
 
-@router.get("", response_model=list[RestaurantResponse])
+@router.get("", response_model=list[PublicRestaurantResponse])
 def list_restaurants(db: DbSession):
-    return list(db.scalars(select(Restaurant).where(Restaurant.is_active.is_(True)).order_by(Restaurant.name)))
+    ratings = (
+        select(
+            Order.restaurant_id.label("restaurant_id"),
+            func.avg(Review.rating).label("average_rating"),
+            func.count(Review.id).label("review_count"),
+        )
+        .join(Review, Review.order_id == Order.id)
+        .group_by(Order.restaurant_id)
+        .subquery()
+    )
+    rows = db.execute(
+        select(Restaurant, ratings.c.average_rating, ratings.c.review_count)
+        .outerjoin(ratings, ratings.c.restaurant_id == Restaurant.id)
+        .where(Restaurant.is_active.is_(True))
+        .order_by(Restaurant.name)
+    ).all()
+    return [
+        PublicRestaurantResponse(
+            id=restaurant.id,
+            name=restaurant.name,
+            description=restaurant.description,
+            is_active=restaurant.is_active,
+            average_rating=float(average_rating) if average_rating is not None else None,
+            review_count=int(review_count or 0),
+        )
+        for restaurant, average_rating, review_count in rows
+    ]
 
 
 @router.get("/mine", response_model=list[RestaurantResponse])

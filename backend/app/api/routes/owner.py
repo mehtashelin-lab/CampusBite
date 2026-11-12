@@ -19,6 +19,7 @@ router = APIRouter()
 def owner_order_response(order: Order) -> OwnerOrderResponse:
     data = OrderResponse.model_validate(order).model_dump()
     data["delivery_partner_name"] = order.delivery_partner.full_name if order.delivery_partner else None
+    data["cancelled_at"] = order.status_updated_at if order.status == OrderStatus.CANCELLED else None
     return OwnerOrderResponse.model_validate(data)
 
 

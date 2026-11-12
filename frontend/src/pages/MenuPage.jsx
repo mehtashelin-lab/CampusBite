@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { api, formatMoney } from "../api/client.js";
 import Loading from "../components/Loading.jsx";
 import Notice from "../components/Notice.jsx";
+import RestaurantRating from "../components/RestaurantRating.jsx";
 import { useCart } from "../context/CartContext.jsx";
 
 export default function MenuPage() {
@@ -50,7 +51,7 @@ export default function MenuPage() {
   return (
     <section className="section-wrap menu-page">
       <Link className="back-link" to="/">← All restaurants</Link>
-      <div className="menu-heading"><div><p className="eyebrow">Today’s menu</p><h1>{restaurant?.name || "Restaurant menu"}</h1><p>{restaurant?.description}</p></div><Link className="button button-outline" to="/cart">View cart <span className="button-count">{itemCount}</span></Link></div>
+      <div className="menu-heading"><div><p className="eyebrow">Today’s menu</p><h1>{restaurant?.name || "Restaurant menu"}</h1><p>{restaurant?.description}</p>{restaurant && <RestaurantRating restaurant={restaurant} />}</div><Link className="button button-outline" to="/cart">View cart <span className="button-count">{itemCount}</span></Link></div>
       <Notice>{error}</Notice><Notice tone="success">{cartMessage}</Notice>
       <div className="menu-filters">
         <label className="search-field"><span aria-hidden="true">⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search dishes" aria-label="Search dishes" /></label>

@@ -3,6 +3,7 @@ import { api, formatMoney, formatOrderDate } from "../api/client.js";
 import Loading from "../components/Loading.jsx";
 import Notice from "../components/Notice.jsx";
 import OrderFilters, { DELIVERY_ORDER_STATUSES, filterOrders } from "../components/OrderFilters.jsx";
+import { visibleOrderBatch } from "../components/dashboardOrderUtils.js";
 
 function DeliveryOrder({ order, busy, onStatusChange }) {
   const nextStatus = order.status === "ASSIGNED" ? "OUT_FOR_DELIVERY" : "DELIVERED";
@@ -29,6 +30,8 @@ export default function DeliveryPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [orderFilters, setOrderFilters] = useState({ statuses: [], from: "", to: "" });
+  const [showHistory, setShowHistory] = useState(false);
+  const [visibleHistoryCount, setVisibleHistoryCount] = useState(5);
 
   async function refresh(showLoading = false) {
     if (showLoading) setLoading(true);
@@ -79,6 +82,12 @@ export default function DeliveryPage() {
   const deliveredOrders = orders.filter((order) => order.status === "DELIVERED");
   const filteredActiveOrders = useMemo(() => filterOrders(activeOrders, orderFilters), [activeOrders, orderFilters]);
   const filteredDeliveredOrders = useMemo(() => filterOrders(deliveredOrders, orderFilters), [deliveredOrders, orderFilters]);
+  const visibleDeliveredOrders = useMemo(() => visibleOrderBatch(filteredDeliveredOrders, visibleHistoryCount), [filteredDeliveredOrders, visibleHistoryCount]);
+
+  useEffect(() => {
+    setVisibleHistoryCount(5);
+    if (orderFilters.statuses.includes("DELIVERED")) setShowHistory(true);
+  }, [orderFilters]);
 
   if (loading) return <section className="section-wrap"><Loading label="Opening your delivery workspace" /></section>;
 
@@ -89,6 +98,6 @@ export default function DeliveryPage() {
     {orders.length > 0 && <OrderFilters value={orderFilters} onChange={setOrderFilters} statuses={DELIVERY_ORDER_STATUSES} />}
     <div className="section-heading dashboard-section-heading"><div><p className="eyebrow">On the road</p><h2>Active deliveries</h2></div><span className="count-label">{activeOrders.length} active</span></div>
     {activeOrders.length ? filteredActiveOrders.length ? <div className="order-list">{filteredActiveOrders.map((order) => <DeliveryOrder key={order.id} order={order} busy={busyOrderId === order.id} onStatusChange={updateStatus} />)}</div> : <div className="compact-empty"><h3>No matching active deliveries</h3></div> : <div className="compact-empty"><span className="empty-icon">◷</span><h3>No active deliveries</h3><p>Orders assigned to you will appear here.</p></div>}
-    {deliveredOrders.length > 0 && <><div className="section-heading dashboard-section-heading delivery-history-heading"><div><p className="eyebrow">Completed</p><h2>Delivery history</h2></div><span className="count-label">{deliveredOrders.length} delivered</span></div>{filteredDeliveredOrders.length ? <div className="order-list">{filteredDeliveredOrders.map((order) => <DeliveryOrder key={order.id} order={order} busy={false} onStatusChange={updateStatus} />)}</div> : <div className="compact-empty"><h3>No matching delivered orders</h3></div>}</>}
+    {deliveredOrders.length > 0 && <section className="delivery-history-section"><div className="section-heading dashboard-section-heading delivery-history-heading"><div><p className="eyebrow">Completed</p><h2>Delivery history</h2></div><span className="count-label">{deliveredOrders.length} delivered</span></div><button className="button button-outline" type="button" aria-expanded={showHistory} onClick={() => { setShowHistory((visible) => !visible); setVisibleHistoryCount(5); }}>{showHistory ? "Hide delivered orders" : `Show delivered orders (${deliveredOrders.length})`}</button>{showHistory && <>{filteredDeliveredOrders.length ? <><div className="order-list">{visibleDeliveredOrders.map((order) => <DeliveryOrder key={order.id} order={order} busy={false} onStatusChange={updateStatus} />)}</div>{visibleDeliveredOrders.length < filteredDeliveredOrders.length && <button className="button button-outline" type="button" onClick={() => setVisibleHistoryCount((count) => count + 5)}>Show 5 more delivered orders</button>}</> : <div className="compact-empty"><h3>No matching delivered orders</h3></div>}</>}</section>}
   </section>;
 }

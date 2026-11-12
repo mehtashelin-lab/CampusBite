@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../api/client.js";
 import Loading from "../components/Loading.jsx";
 import Notice from "../components/Notice.jsx";
+import RestaurantRating from "../components/RestaurantRating.jsx";
 
 const accents = ["coral", "sage", "gold", "blue"];
 
@@ -61,7 +62,7 @@ export default function RestaurantsPage() {
                   <span className="art-symbol" aria-hidden="true">{["✳", "◒", "✦", "◈"][index % 4]}</span>
                   <span className="art-label">CAMPUS<br />FAVOURITE</span>
                 </div>
-                <div className="restaurant-card-info"><div><h3>{restaurant.name}</h3><p>{restaurant.description || "Fresh picks and campus favourites"}</p></div><span className="arrow-round" aria-hidden="true">↗</span></div>
+                <div className="restaurant-card-info"><div><h3>{restaurant.name}</h3><p>{restaurant.description || "Fresh picks and campus favourites"}</p><RestaurantRating restaurant={restaurant} /></div><span className="arrow-round" aria-hidden="true">↗</span></div>
               </Link>
             ))}
           </div>

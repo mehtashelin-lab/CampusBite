@@ -79,6 +79,15 @@ class CustomerAddressResponse(BaseModel):
 
 class OwnerOrderResponse(OrderResponse):
     delivery_partner_name: str | None = None
+    cancelled_at: datetime | None = None
+
+    @field_serializer("cancelled_at")
+    def serialize_cancelled_at(self, value: datetime | None) -> str | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=UTC)
+        return value.isoformat()
 
 
 class DeliveryPartnerOrderResponse(OrderResponse):

@@ -198,6 +198,32 @@ h1, h2, h3, p { margin-top: 0; }
 .delivery-order-card .order-lines { margin: 12px 0; padding: 12px 0; }
 .delivery-history-heading { margin-top: 48px; }
 @media (max-width: 620px) { .delivery-page .dashboard-welcome { align-items: flex-start; }.delivery-page .dashboard-welcome > button { width: 100%; }.delivery-history-heading { margin-top: 36px; } }
+
+.owner-tabs { display: flex; gap: 8px; margin: 4px 0 18px; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
+.owner-tab { padding: 10px 16px; border: 0; border-bottom: 2px solid transparent; color: var(--muted); background: transparent; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.owner-tab.is-active { border-bottom-color: var(--green); color: var(--green); }
+.owner-workspace { display: block; }
+.owner-main-column { min-width: 0; }
+.owner-tabs + .owner-workspace > .owner-orders-panel { max-width: 100%; }
+.owner-average-rating { display: block; margin-top: 7px; color: #725b25; font-size: 10px; font-weight: 700; }
+.owner-past-orders { display: grid; justify-items: start; gap: 14px; margin-top: 18px; }
+.owner-past-orders .order-list { width: 100%; }
+.owner-past-orders > .button, .delivery-history-section > .button { min-height: 38px; }
+.restaurant-rating { margin: 8px 0 0; color: #80652b; font-size: 11px; font-weight: 700; }
+.restaurant-rating > span:first-child { color: #c79834; }
+.restaurant-rating-count { color: var(--muted); font-weight: 500; }
+.restaurant-rating-empty { color: var(--muted); font-weight: 500; }
+.menu-heading .restaurant-rating { font-size: 13px; }
+.delivery-history-section > .order-list { margin-top: 16px; }
+@media (max-width: 620px) {
+  .owner-tabs { overflow-x: auto; }
+  .owner-tab { flex: 1 0 auto; }
+  .owner-page .stats-row { align-items: stretch; }
+  .owner-gross-card { grid-column: 1 / -1; }
+  .owner-page .panel-card { padding: 17px; }
+  .owner-past-orders { width: 100%; }
+  .owner-past-orders > .button, .owner-past-orders > .order-list, .owner-past-orders > .order-list + .button { width: 100%; }
+}
 @media (max-width: 620px) { .order-filters { align-items: stretch; }.order-filters > *, .status-filter, .date-filter, .date-filter input { width: 100%; }.status-filter-options { min-width: 0; width: 100%; }.order-filters > .text-button { text-align: left; } }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
