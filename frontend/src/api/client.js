@@ -61,6 +61,7 @@ export const api = {
   addCustomerAddress: (address) => request("/api/orders/addresses", { method: "POST", body: { address } }),
   deleteCustomerAddress: (addressId) => request(`/api/orders/addresses/${addressId}`, { method: "DELETE" }),
   myOrders: () => request("/api/orders/me"),
+  askOrderInsight: (question) => request("/api/orders/insights", { method: "POST", body: { question } }),
   myReviews: () => request("/api/orders/reviews/me"),
   createReview: (orderId, body) => request(`/api/orders/${orderId}/review`, { method: "POST", body }),
   myRefundRequests: () => request("/api/orders/refund-requests/me"),

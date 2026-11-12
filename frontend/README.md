@@ -20,6 +20,7 @@ The frontend is a React app built with Vite. It calls the FastAPI backend at `ht
 - Order summaries show the order date and time beneath the order number. Delivered orders also show their completion date, time, and delivery partner when that information is recorded.
 - Delivery partners cannot browse restaurants or menus. They can set availability, receive one active delivery at a time, start a delivery, mark it delivered, and review completed deliveries.
 - Customer, owner, and delivery dashboards can filter orders by status and date range.
+- The customer dashboard includes a question-and-answer panel based on the customer's 20 most recent orders. Delivery addresses and account identity details are not sent to OpenAI. The backend needs `OPENAI_API_KEY` configured for the feature to answer questions.
 - New accounts require matching password and confirmation fields.
 
 ## Code map

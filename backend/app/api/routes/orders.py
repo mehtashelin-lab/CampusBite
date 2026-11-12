@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, select
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.api.deps import DbSession, require_role
 from app.models import CustomerAddress, MenuItem, Order, OrderItem, OrderStatus, PaymentLedger, RefundRequest, Restaurant, Review, User, UserRole
@@ -16,10 +17,75 @@ from app.schemas.order import (
     ReviewResponse,
     OrderStatusResponse,
 )
+from app.schemas.insight import InsightAnswer, InsightQuestion
+from app.services.order_insights import (
+    InsightRateLimited,
+    InsightUnavailable,
+    generate_order_insight,
+)
 from app.services.order_reminders import resolve_order_reminder
+from app.core.config import settings
 
 router = APIRouter()
 MAX_CUSTOMER_ADDRESSES = 5
+ORDER_INSIGHT_HISTORY_LIMIT = 20
+
+
+@router.post("/insights", response_model=InsightAnswer)
+def ask_about_order_history(
+    request: InsightQuestion,
+    db: DbSession,
+    customer: User = Depends(require_role(UserRole.CUSTOMER)),
+):
+    if not settings.openai_api_key.strip():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Order insights are unavailable because the AI service is not configured.",
+        )
+    orders = list(
+        db.scalars(
+            select(Order)
+            .where(Order.customer_id == customer.id)
+            .options(selectinload(Order.items), joinedload(Order.restaurant))
+            .order_by(Order.created_at.desc(), Order.id.desc())
+            .limit(ORDER_INSIGHT_HISTORY_LIMIT)
+        ).unique()
+    )
+    if not orders:
+        return InsightAnswer(answer="You do not have any orders yet. Place an order, then ask again.")
+
+    context = [
+        {
+            "date": order.created_at.isoformat(),
+            "status": order.status.value,
+            "restaurant": order.restaurant.name,
+            "total_rupees": round(order.total_paise / 100, 2),
+            "items": [
+                {
+                    "name": item.item_name,
+                    "quantity": item.quantity,
+                    "unit_price_rupees": round(item.unit_price_paise / 100, 2),
+                }
+                for item in order.items
+            ],
+        }
+        for order in orders
+    ]
+    try:
+        answer = generate_order_insight(
+            request.question, context, settings.openai_api_key, settings.openai_model
+        )
+    except InsightRateLimited:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Order insights are temporarily rate-limited. Please try again later.",
+        )
+    except InsightUnavailable:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Order insights are temporarily unavailable. Please try again later.",
+        )
+    return InsightAnswer(answer=answer)
 
 
 def get_or_create_address(db: DbSession, customer: User, address: str) -> CustomerAddress:

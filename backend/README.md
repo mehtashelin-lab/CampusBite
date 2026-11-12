@@ -24,6 +24,10 @@ Each restaurant owner can create one restaurant. Orders include a UTC creation t
 
 Customers can save up to five delivery addresses. Existing order addresses are migrated into each customer's saved list (up to the five most recent unique addresses); saved addresses can be selected or removed at checkout.
 
+## Customer order insights
+
+Customers can ask `POST /api/orders/insights` questions about their 20 most recent orders. The backend scopes the query to the authenticated customer and sends only the date, restaurant, status, total, and item summaries to OpenAI. It excludes delivery addresses and customer identity details. Set `OPENAI_API_KEY` in the local `.env`; `OPENAI_MODEL` defaults to `gpt-4o-mini`. Missing configuration, provider failures, and rate limits return clear errors instead of a generated fallback answer.
+
 ## Useful delivery endpoints
 
 - `PATCH /api/owner/orders/{order_id}/status` with `PREPARING` or `READY`
@@ -32,6 +36,7 @@ Customers can save up to five delivery addresses. Existing order addresses are m
 - `PATCH /api/delivery/orders/{order_id}/status` with `OUT_FOR_DELIVERY` or `DELIVERED`
 
 `POST /api/orders` now requires `delivery_address` along with the restaurant and item list.
+`POST /api/orders/insights` accepts `{ "question": "..." }` and returns `{ "answer": "..." }` for authenticated customers.
 
 ## Main folders
 
